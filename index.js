@@ -20,6 +20,7 @@ const intialzerDBServer = async () => {
     process.exit(1)
   }
 }
+
 //GET ALL BOOKS
 app.get('/books/', async (req, res) => {
   const query = `
@@ -32,6 +33,28 @@ app.get('/books/', async (req, res) => {
   const booksData = await db.all(query)
   res.send(booksData)
 })
+//Filter Books By search text and sorting and limit and offset
+app.get('/books/', async (request, response) => {
+  const {
+    offset = 0,
+    limit = 20,
+    search_q = '',
+    order_by = 'book_id',
+    order = 'ASC',
+  } = request.query
+
+  const getBooksQuery = `SELECT
+      *
+    FROM
+      book
+    WHERE 
+      title LIKE '%${search_q}%'
+    ORDER BY  ${order_by} ${order}
+    LIMIT ${limit} OFFSET ${offset};`
+  const booksArray = await db.all(getBooksQuery)
+  response.send(booksArray)
+})
+
 //GET a Book By it's id
 app.get('/books/:bookId/', async (req, res) => {
   const {bookId} = req.params
